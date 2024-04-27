@@ -51,14 +51,17 @@ class Szalloda:
         self.szobak.append(EgyagyasSzoba("03"))
 
     def foglalas(self, szobaszam, datum):
-        datum_obj = datetime.strptime(datum, '%Y-%m-%d')
-        if datum_obj < datetime.now():
-            return "A foglalási dátum nem lehet a múltban."
-        if any(f.szobaszam == szobaszam and f.datum == datum for f in self.foglalasok):
-            return "Ez a szoba már foglalt ezen a napon."
         szoba = next((s for s in self.szobak if s.szobaszam == szobaszam), None)
         if not szoba:
             return "Nem létező szobaszám."
+
+        datum_obj = datetime.strptime(datum, '%Y-%m-%d')
+        if datum_obj < datetime.now():
+            return "A foglalási dátum nem lehet a múltban."
+
+        if any(f.szobaszam == szobaszam and f.datum == datum for f in self.foglalasok):
+            return "Ez a szoba már foglalt ezen a napon."
+
         foglalasi_szam = str(random.randint(10000000, 99999999))
         self.foglalasok.append(Foglalas(szobaszam, datum, foglalasi_szam, szoba.ar_megad()))
         return f"Foglalás sikeres. Foglalási szám: {foglalasi_szam}, Ár: {szoba.ar_megad()} Ft"
@@ -93,7 +96,13 @@ def felhasznaloi_interfesz():
         print("\n1. Foglalás\n2. Foglalások listázása\n3. Foglalás törlése\n4. Kilépés")
         valasztas = input("Válasszon egy opciót: ")
         if valasztas == "1":
-            szobaszam = input("Adja meg a szobaszámot (01, 02, 03): ")
+            while True:
+                szobaszam = input("Adja meg a szobaszámot (01, 02, 03): ")
+                szoba = next((s for s in szalloda.szobak if s.szobaszam == szobaszam), None)
+                if szoba:
+                    break
+                else:
+                    print("Nem létező szobaszám.")
             datum = input("Adja meg a foglalás dátumát (YYYY-MM-DD): ")
             print(szalloda.foglalas(szobaszam, datum))
         elif valasztas == "2":
